@@ -59,6 +59,7 @@ jobs:
         unzip android-ndk-r11c-linux-x86_64.zip
         mkdir -p Android/Sdk/ndk
         mv android-ndk-r11c Android/Sdk/ndk/
+        cp config/module-lite.sh config/module.sh
         export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
         export ANDROID_HOME=$BASEWORKDIR/Android/Sdk
         export ANDROID_NDK=$BASEWORKDIR/Android/Sdk/ndk/android-ndk-r11c
@@ -69,11 +70,13 @@ jobs:
         bash init-android.sh
         echo '--> init-android-openssl.sh'
         bash init-android-openssl.sh
+        
         cd $BASEWORKDIR/android/contrib
         echo '--> compile-openssl.sh'
         bash compile-openssl.sh x86_64
         echo '--> compile-ffmpeg.sh'
         bash compile-ffmpeg.sh x86_64
+        
         cd $BASEWORKDIR/android
         echo '--> compile-ijk.sh'
         bash compile-ijk.sh x86_64
