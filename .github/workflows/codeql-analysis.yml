@@ -55,14 +55,14 @@ jobs:
         ./sdkmanager --install platform-tools
         cd $BASEWORKDIR
 
-        wget https://dl.google.com/android/repository/android-ndk-r20-linux-x86_64.zip
-        unzip android-ndk-r20-linux-x86_64.zip
+        wget https://dl.google.com/android/repository/android-ndk-r10e-linux-x86_64.zip
+        unzip android-ndk-r10e-linux-x86_64.zip
         mkdir -p Android/Sdk/ndk
-        mv android-ndk-r20 Android/Sdk/ndk/
+        mv android-ndk-r10e Android/Sdk/ndk/
         export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
         export ANDROID_HOME=$BASEWORKDIR/Android/Sdk
-        export ANDROID_NDK=$BASEWORKDIR/Android/Sdk/ndk/android-ndk-r20
-        export ANDROID_NDK_ROOT=$BASEWORKDIR/Android/Sdk/ndk/android-ndk-r20
+        export ANDROID_NDK=$BASEWORKDIR/Android/Sdk/ndk/android-ndk-r10e
+        export ANDROID_NDK_ROOT=$BASEWORKDIR/Android/Sdk/ndk/android-ndk-r10e
 
         cd $BASEWORKDIR/config
         rm module.sh
@@ -74,18 +74,18 @@ jobs:
         sed -i "/--disable-vda/d" module.sh
 
         cd $BASEWORKDIR
-        echo '=== init-android.sh ==='
+        echo '--> init-android.sh'
         bash init-android.sh
-        echo '=== init-android-openssl.sh ==='
+        echo '--> init-android-openssl.sh'
         bash init-android-openssl.sh
         cd $BASEWORKDIR/android/contrib
-        echo '=== compile-openssl.sh ==='
-        ./compile-openssl.sh x86_64 
-        echo '=== compile-ffmpeg.sh ==='
-        ./compile-ffmpeg.sh x86_64
+        echo '--> compile-openssl.sh'
+        bash tools/do-compile-openssl.sh x86_64
+        echo '--> compile-ffmpeg.sh'
+        bash compile-ffmpeg.sh x86_64
         cd $BASEWORKDIR/android
-        echo '=== compile-ijk.sh ==='
-        ./compile-ijk.sh x86_64
+        echo '--> compile-ijk.sh'
+        bash compile-ijk.sh x86_64
 
         cd $BASEWORKDIR/android/ijkplayer
         sed -i "/ijkplayer-example/d" settings.gradle
