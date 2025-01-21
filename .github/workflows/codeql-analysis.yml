@@ -64,15 +64,6 @@ jobs:
         export ANDROID_NDK=$BASEWORKDIR/Android/Sdk/ndk/android-ndk-r10e
         export ANDROID_NDK_ROOT=$BASEWORKDIR/Android/Sdk/ndk/android-ndk-r10e
 
-        cd $BASEWORKDIR/config
-        rm module.sh
-        cp module-default.sh module.sh
-        echo "" >> module.sh
-        echo "" >> module.sh
-        echo "export COMMON_FF_CFG_FLAGS=\"\$COMMON_FF_CFG_FLAGS --disable-linux-perf --enable-openssl\"" >> module.sh
-        sed -i "/--disable-ffserver/d" module.sh
-        sed -i "/--disable-vda/d" module.sh
-
         cd $BASEWORKDIR
         echo '--> init-android.sh'
         bash init-android.sh
@@ -80,7 +71,7 @@ jobs:
         bash init-android-openssl.sh
         cd $BASEWORKDIR/android/contrib
         echo '--> compile-openssl.sh'
-        bash tools/do-compile-openssl.sh x86_64
+        bash compile-openssl.sh x86_64
         echo '--> compile-ffmpeg.sh'
         bash compile-ffmpeg.sh x86_64
         cd $BASEWORKDIR/android
