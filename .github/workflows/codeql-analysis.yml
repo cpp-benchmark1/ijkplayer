@@ -49,7 +49,7 @@ jobs:
         mv cmdline-tools Android/Sdk/cmdline-tools/latest
         cd Android/Sdk/cmdline-tools/latest/bin
         echo 'sdkmanager 0'
-        for i in {1..10}; do y; sleep 1; done | ./sdkmanager --licenses
+        for i in {1..10}; do yes; sleep 1; done | ./sdkmanager --licenses
         echo 'sdkmanager 1'
         ./sdkmanager --install platforms\;android-25
         echo 'sdkmanager 2'
