@@ -1,0 +1,115 @@
+name: "CodeQL"
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+    inputs:
+      languages:
+        description: "Languages to analyze"
+        required: true
+        default: "c-cpp"
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: 'ubuntu-24.04'
+    permissions:
+      security-events: write
+      packages: read
+      actions: read
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - language: c-cpp
+          build-mode: manual
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: ${{ matrix.language }}
+        build-mode: ${{ matrix.build-mode }}
+    - if: matrix.build-mode == 'manual'
+      shell: bash
+      run: |
+        sudo apt-get install -y git yasm curl wget gcc make cmake unzip build-essential
+        sudo add-apt-repository -y ppa:openjdk-r/ppa
+        sudo apt-get install -y openjdk-8-jdk openjdk-17-jdk
+        BASEWORKDIR=$(pwd)
+        
+        wget https://dl.google.com/android/repository/commandlinetools-linux-9123335_latest.zip
+        unzip commandlinetools-linux-9123335_latest.zip
+        mkdir -p Android/Sdk/cmdline-tools
+        mv cmdline-tools Android/Sdk/cmdline-tools/latest
+        cd Android/Sdk/cmdline-tools/latest/bin
+        yes | ./sdkmanager --licenses
+        ./sdkmanager --install platforms\;android-25
+        ./sdkmanager --install build-tools\;25.0.3
+        ./sdkmanager --install sources\;android-25
+        ./sdkmanager --install platform-tools
+        cd $BASEWORKDIR
+
+        wget https://dl.google.com/android/repository/android-ndk-r10e-linux-x86_64.zip
+        unzip android-ndk-r10e-linux-x86_64.zip
+        mkdir -p Android/Sdk/ndk
+        mv android-ndk-r10e Android/Sdk/ndk/
+        export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+        export ANDROID_HOME=$BASEWORKDIR/Android/Sdk
+        export ANDROID_NDK=$BASEWORKDIR/Android/Sdk/ndk/android-ndk-r10e
+
+        cd $BASEWORKDIR/config
+        rm module.sh
+        cp module-default.sh module.sh
+        echo "" >> module.sh
+        echo "" >> module.sh
+        echo "export COMMON_FF_CFG_FLAGS=\"\$COMMON_FF_CFG_FLAGS --disable-linux-perf --enable-openssl\"" >> module.sh
+        sed -i "/--disable-ffserver/d" module.sh
+        sed -i "/--disable-vda/d" module.sh
+
+        cd $BASEWORKDIR
+        ./init-android.sh
+        ./init-android-openssl.sh
+        cd $BASEWORKDIR/android/contrib
+        ./compile-openssl.sh all
+        ./compile-ffmpeg.sh all
+        cd $BASEWORKDIR/android
+        ./compile-ijk.sh all
+
+        cd $BASEWORKDIR/android/ijkplayer
+        sed -i "/ijkplayer-example/d" settings.gradle
+        sed -i "/ijkplayer-exo/d" settings.gradle
+        ./gradlew clean
+        ./gradlew assembleRelease
+    - name: Free disk space
+      run: |
+          sudo docker rmi $(docker image ls -aq) >/dev/null 2>&1 || true
+          sudo rm -rf \
+            /usr/share/dotnet /usr/local/lib/android /opt/ghc \
+            /usr/local/share/powershell /usr/share/swift /usr/local/.ghcup \
+            /usr/lib/jvm || true
+          sudo apt-get purge aria2 ansible azure-cli shellcheck rpm xorriso zsync \
+            esl-erlang firefox gfortran-8 gfortran-9 google-chrome-stable \
+            google-cloud-sdk imagemagick \
+            libmagickcore-dev libmagickwand-dev libmagic-dev ant ant-optional kubectl \
+            mercurial apt-transport-https mono-complete libmysqlclient \
+            unixodbc-dev yarn chrpath libssl-dev libxft-dev \
+            libfreetype6 libfreetype6-dev libfontconfig1 libfontconfig1-dev \
+            snmp pollinate libpq-dev postgresql-client powershell ruby-full \
+            sphinxsearch subversion mongodb-org azure-cli microsoft-edge-stable \
+            -y -f || true
+          sudo apt-get purge google-cloud-sdk -f -y  || true
+          sudo apt-get purge '~n ^mysql' -f -y  || true
+          sudo apt-get purge '~n ^php' -f -y  || true
+          sudo apt-get purge '~n ^dotnet' -f -y  || true
+          sudo apt-get autoremove -y || true
+          sudo apt-get autoclean -y || true
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:${{matrix.language}}"
