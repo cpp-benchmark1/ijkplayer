@@ -48,17 +48,11 @@ jobs:
         mkdir -p Android/Sdk/cmdline-tools
         mv cmdline-tools Android/Sdk/cmdline-tools/latest
         cd Android/Sdk/cmdline-tools/latest/bin
-        echo 'sdkmanager 0'
-        for i in {1..10}; do yes; sleep 1; done | ./sdkmanager --licenses || true
-        echo 'sdkmanager 1'
+        yes | ./sdkmanager --licenses || true
         ./sdkmanager --install platforms\;android-25
-        echo 'sdkmanager 2'
         ./sdkmanager --install build-tools\;25.0.3
-        echo 'sdkmanager 3'
         ./sdkmanager --install sources\;android-25
-        echo 'sdkmanager 4'
         ./sdkmanager --install platform-tools
-        echo 'sdkmanager 5'
         cd $BASEWORKDIR
 
         wget https://dl.google.com/android/repository/android-ndk-r10e-linux-x86_64.zip
@@ -67,6 +61,7 @@ jobs:
         mv android-ndk-r10e Android/Sdk/ndk/
         export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
         export ANDROID_HOME=$BASEWORKDIR/Android/Sdk
+        export ANDROID_NDK_ROOT=$BASEWORKDIR/Android/Sdk/ndk
         export ANDROID_NDK=$BASEWORKDIR/Android/Sdk/ndk/android-ndk-r10e
 
         cd $BASEWORKDIR/config
@@ -79,13 +74,13 @@ jobs:
         sed -i "/--disable-vda/d" module.sh
 
         cd $BASEWORKDIR
-        ./init-android.sh
-        ./init-android-openssl.sh
+        bash init-android.sh
+        bash init-android-openssl.sh
         cd $BASEWORKDIR/android/contrib
-        ./compile-openssl.sh all
-        ./compile-ffmpeg.sh all
+        bash compile-openssl.sh all
+        bash compile-ffmpeg.sh all
         cd $BASEWORKDIR/android
-        ./compile-ijk.sh all
+        bash compile-ijk.sh all
 
         cd $BASEWORKDIR/android/ijkplayer
         sed -i "/ijkplayer-example/d" settings.gradle
