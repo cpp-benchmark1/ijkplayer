@@ -61,8 +61,8 @@ jobs:
         mv android-ndk-r10e Android/Sdk/ndk/
         export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
         export ANDROID_HOME=$BASEWORKDIR/Android/Sdk
-        export ANDROID_NDK_ROOT=$BASEWORKDIR/Android/Sdk/ndk
         export ANDROID_NDK=$BASEWORKDIR/Android/Sdk/ndk/android-ndk-r10e
+        export ANDROID_NDK_ROOT=$BASEWORKDIR/Android/Sdk/ndk/android-ndk-r10e
 
         cd $BASEWORKDIR/config
         rm module.sh
