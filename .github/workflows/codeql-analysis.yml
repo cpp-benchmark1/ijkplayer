@@ -75,17 +75,17 @@ jobs:
 
         cd $BASEWORKDIR
         echo 'init-android.sh'
-        bash init-android.sh --system=linux-x86_64
+        bash init-android.sh
         echo 'init-android-openssl.sh'
-        bash init-android-openssl.sh --system=linux-x86_64
+        bash init-android-openssl.sh
         cd $BASEWORKDIR/android/contrib
         echo 'compile-openssl.sh'
-        bash compile-openssl.sh all --system=linux-x86_64
+        bash compile-openssl.sh x86_64
         echo 'compile-ffmpeg.sh'
-        bash compile-ffmpeg.sh all --system=linux-x86_64
+        bash compile-ffmpeg.sh x86_64
         cd $BASEWORKDIR/android
         echo 'compile-ijk.sh'
-        bash compile-ijk.sh all --system=linux-x86_64
+        bash compile-ijk.sh x86_64
 
         cd $BASEWORKDIR/android/ijkplayer
         sed -i "/ijkplayer-example/d" settings.gradle
